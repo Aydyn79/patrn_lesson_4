@@ -1,7 +1,9 @@
 from quopri import decodestring
 
 from frame.requests import Post, Get
+from patterns.create_pattern import Logger
 
+log = Logger()
 
 class PageNotFound:
     def __call__(self, request):

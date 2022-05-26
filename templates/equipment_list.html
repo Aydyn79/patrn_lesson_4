@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}
-Список сервисов
+Список оборудования
 {% endblock %}
 {% block style %}
 	{% include "inc_style.html" %}
@@ -16,7 +16,7 @@
 
         {% for item in objects_list %}
         <li>
-            {{item.name}} <span>Количество сервисов: {{item.service_count()}}</span>
+            {{item.name}} <span>Количество сервисов: {{item.services_count}}</span>
         </li>
         {% endfor %}
     </ul>

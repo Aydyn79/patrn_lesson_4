@@ -1,12 +1,15 @@
 from frame.templator import render
 from logs.config_client_log import LOGGER
 from patterns.create_pattern import Engine
+from patterns.create_pattern import Logger
+
+log = Logger()
 
 site = Engine()
 
 class Index:
     def __call__(self, request):
-        return '200 OK', render('index.html', date=request.get('date', None))
+        return '200 OK', render('index.html', objects_list=site.equipments, date=request.get('date', None))
 
 
 class About:
@@ -24,6 +27,7 @@ class ServicesList:
         try:
             equipment = site.find_equipment_by_id(
                 int(request['request_params']['id']))
+
             return '200 OK', render('service_list.html',
                                     objects_list=equipment.services,
                                     name=equipment.name, id=equipment.id)
@@ -39,15 +43,15 @@ class CreateService:
         if request['method'] == 'POST':
             # метод пост
             data = request['data']
-
             name = data['name']
             name = site.decode_value(name)
+            log.log(name)
 
             equipment = None
             if self.equipment_id != -1:
                 equipment = site.find_equipment_by_id(int(self.equipment_id))
 
-                service = site.create_service('record', name, equipment)
+                service = site.create_service('сommissioning', name, equipment)
                 site.services.append(service)
 
             return '200 OK', render('service_list.html',
@@ -82,9 +86,8 @@ class CreateEquipment:
                 equipment = site.find_equipment_by_id(int(equipment_id))
 
             new_equipment = site.create_equipment(name, equipment)
-
+            log.log(new_equipment.id)
             site.equipments.append(new_equipment)
-
             return '200 OK', render('index.html', objects_list=site.equipments)
         else:
             equipments = site.equipments
@@ -95,9 +98,12 @@ class CreateEquipment:
 # контроллер списка оборудования
 class EquipmentList:
     def __call__(self, request):
-        LOGGER.log('Список оборудования')
+
         return '200 OK', render('equipment_list.html',
                                 objects_list=site.equipments)
+    def show_list(self):
+        for item in site.equipments:
+            print(item.services_count())
 
 
 # контроллер копирования сервиса

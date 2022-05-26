@@ -1,9 +1,42 @@
 
-
+import os
+import sys
 from copy import deepcopy
 
 # нулевой пользователь
+from datetime import datetime
 from quopri import decodestring
+
+
+# "Безымянный" сиглтон
+class UnnamedSingleForLogger(type):
+    _instances = {}
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(UnnamedSingleForLogger, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+class Logger(metaclass=UnnamedSingleForLogger):
+    @staticmethod
+    def log(text):
+        # Прописываем путь лог-файла
+        PATH = os.path.dirname(os.path.abspath(__file__))
+        PATH = os.path.join(PATH, 'views.log')
+        # Сохраняем текущий стандартный вывод,
+        # чтобы можно было вернуть sys.stdout после завершения перенаправления
+        stdout_fileno = sys.stdout
+        # Направляем вывод sys.stdout в лог-файл
+        sys.stdout = open(PATH, 'a', encoding="utf-8")
+        # Печатаем в лог-файле текст лога
+        sys.stdout.write(f"{datetime.now().strftime('%H:%M:%S - %d.%m.%Y ')} {text} \n")
+        # Выводим текст лога на фактический сохраненный обработчик
+        stdout_fileno.write(f"{datetime.now().strftime('%H:%M:%S - %d.%m.%Y ')} {text} \n")
+        # Закрываем файл
+        sys.stdout.close()
+        # Восстанавливаем sys.stdout в наш старый сохраненный обработчик файлов
+        sys.stdout = stdout_fileno
+
+
 
 
 class AbsUser:
@@ -78,7 +111,7 @@ class ServiceFactory:
     def create(cls, type_, name, equipment):
         return cls.types[type_](name, equipment)
 
-# категория
+# Оборудование
 class Equipment:
     auto_id = 0
 
@@ -91,7 +124,7 @@ class Equipment:
 
     def services_count(self):
         result = len(self.services)
-        if self.services:
+        if self.equipment:
             result += self.equipment.services_count()
         return result
 
@@ -136,31 +169,13 @@ class Engine:
         return val_decode_str.decode('UTF-8')
 
 
-# # порождающий паттерн Синглтон
-# class SingletonByName(type):
-#
-#     def __init__(cls, name, bases, attrs, **kwargs):
-#         super().__init__(name, bases, attrs)
-#         cls.__instance = {}
-#
-#     def __call__(cls, *args, **kwargs):
-#         if args:
-#             name = args[0]
-#         if kwargs:
-#             name = kwargs['name']
-#
-#         if name in cls.__instance:
-#             return cls.__instance[name]
-#         else:
-#             cls.__instance[name] = super().__call__(*args, **kwargs)
-#             return cls.__instance[name]
-#
-#
-# class Logger(metaclass=SingletonByName):
-#
-#     def __init__(self, name):
-#         self.name = name
-#
-#     @staticmethod
-#     def log(text):
-#         print('log--->', text)
+
+
+if __name__ == "__main__":
+    logger1 = Logger()
+    logger2 = Logger()
+
+    print(logger1, logger2)
+
+    logger1.log('Привет')
+    logger2.log('Здорово')

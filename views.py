@@ -1,29 +1,35 @@
 from frame.templator import render
-from logs.config_client_log import LOGGER
-from patterns.create_pattern import Engine
-from patterns.create_pattern import Logger
+from patterns.create_pattern import Engine,Logger
+from patterns.struct_pattern import Debug, AppRoute
 
 log = Logger()
-
 site = Engine()
 
+routes = {}
+
+@AppRoute(routes, '/')
 class Index:
+    @Debug()
     def __call__(self, request):
+        print(request)
         return '200 OK', render('index.html', objects_list=site.equipments, date=request.get('date', None))
 
-
+@AppRoute(routes=routes, url='/about/')
 class About:
+    @Debug()
     def __call__(self, request):
         return '200 OK', render('page.html', date=request.get('date', None))
 
+@AppRoute(routes=routes, url='/contacts/')
 class Contact_us:
     def __call__(self, request):
         return '200 OK', render('contact.html', date=request.get('date', None))
 
 # контроллер - список сервисов
+@AppRoute(routes=routes, url='/service_list/')
 class ServicesList:
     def __call__(self, request):
-        LOGGER.info('Список видов сервисов')
+        log.log('Список видов сервисов')
         try:
             equipment = site.find_equipment_by_id(
                 int(request['request_params']['id']))
@@ -36,9 +42,10 @@ class ServicesList:
 
 
 # контроллер создания сервиса
+@AppRoute(routes=routes, url='/create_service/')
 class CreateService:
     equipment_id = -1
-
+    @Debug()
     def __call__(self, request):
         if request['method'] == 'POST':
             # метод пост
@@ -50,8 +57,7 @@ class CreateService:
             equipment = None
             if self.equipment_id != -1:
                 equipment = site.find_equipment_by_id(int(self.equipment_id))
-
-                service = site.create_service('сommissioning', name, equipment)
+                service = site.create_service('remote_support', name, equipment)
                 site.services.append(service)
 
             return '200 OK', render('service_list.html',
@@ -72,7 +78,9 @@ class CreateService:
 
 
 # контроллер создания категории
+@AppRoute(routes=routes, url='/create_equipment/')
 class CreateEquipment:
+    @Debug()
     def __call__(self, request):
 
         if request['method'] == 'POST':
@@ -96,17 +104,21 @@ class CreateEquipment:
 
 
 # контроллер списка оборудования
+@AppRoute(routes=routes, url='/equipment_list/')
 class EquipmentList:
+    @Debug()
     def __call__(self, request):
-
+        print(site.equipments)
         return '200 OK', render('equipment_list.html',
                                 objects_list=site.equipments)
+
     def show_list(self):
         for item in site.equipments:
             print(item.services_count())
 
 
 # контроллер копирования сервиса
+@AppRoute(routes=routes, url='/copy_service/')
 class CopyService:
     def __call__(self, request):
         request_params = request['request_params']

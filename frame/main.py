@@ -60,7 +60,9 @@ class Framework:
         for item in self.fronts:
             item(request)
         # запуск контроллера с передачей объекта request
+        print(request)
         code, body = view(request)
+        print(code)
         response(code, [('Content-Type', 'text/html')])
         return [body.encode('utf-8')]
 

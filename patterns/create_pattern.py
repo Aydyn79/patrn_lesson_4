@@ -81,29 +81,21 @@ class Service(ServicePrototype):
         self.equipment.services.append(self)
 
 
-# Пуско-наладочные работы
-class CommissioningWorks(Service):
+# Удаленное тех.сопровождение (диагностика, программирование, администрирование и др.)
+class RemoteTechnicalSupport(Service):
     pass
 
-# Строительно-монтажные работы
-class InstalationWorks(Service):
-    pass
-
-# Строительно-монтажные работы
+# Работы проводимые по месту(ТО, ТР, СМР, ПНР и т.п.)
 class TechnicalMaintenance(Service):
     pass
 
-# Офшорное программирование
-class OffshoreProgramming(Service):
-    pass
+
 
 # фабрика сервисов
 class ServiceFactory:
     types = {
-        'сommissioning': CommissioningWorks,
-        'instalation': InstalationWorks,
-        'maintenance': TechnicalMaintenance,
-        'programming': OffshoreProgramming,
+        'remote_support': RemoteTechnicalSupport,
+        'on_site_maintenance': TechnicalMaintenance,
     }
 
     # порождающий паттерн Фабричный метод
@@ -168,7 +160,33 @@ class Engine:
         val_decode_str = decodestring(val_b)
         return val_decode_str.decode('UTF-8')
 
-
+# class Debug:
+#     def __call__(self, cls):
+#         '''
+#         сам декоратор
+#         '''
+#         # Узнаем имя класса декорируемой функции
+#         self.cls_name = cls.__qualname__
+#         # это вспомогательная функция будет декорировать каждый отдельный метод класса, см. ниже
+#         def request_type(method):
+#             '''
+#             нужен для того, чтобы декоратор класса wrapper обернул в request_type
+#             метод __call__ класса
+#             '''
+#             if method.__name__ == '__call__':
+#                 def req(*args, **kw):
+#                     result = method(*args, **kw)
+#                     print(f'debug --> имя класса.имя функции: {self.cls_name} тип запроса {args[1]["method"]}')
+#                     return result
+#                 return req
+#             else:
+#                 def req(*args, **kw):
+#                     result = method(*args, **kw)
+#                     print(f'debug --> имя класса.имя функции: {self.cls_name} аргументы функции {args}, {kw}')
+#                     return result
+#                 return req
+#
+#         return request_type(cls)
 
 
 if __name__ == "__main__":

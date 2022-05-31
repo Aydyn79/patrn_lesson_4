@@ -66,3 +66,41 @@ class Framework:
         response(code, [('Content-Type', 'text/html')])
         return [body.encode('utf-8')]
 
+# Отладочный WSGI-application
+class Debuging(Framework):
+    def __init__(self, routes, fronts):
+        self.application = Framework(routes, fronts)
+        super().__init__(routes, fronts)
+
+    def __call__(self, env, start_response):
+        print("\033[34m {}" .format("Вы работаете в отладочном режиме"))
+        print("\033[33m {}" .format(env))
+        # Except error
+        if 'error' in env['PATH_INFO'].lower():
+            raise Exception('Detect "error" in URL path')
+
+        # Session
+        session = env.get('paste.session.factory', lambda: {})()
+        if 'count' in session:
+            count = session['count']
+        else:
+            count = 1
+        session['count'] = count + 1
+        print(f'Вы были здесь {count} раза...')
+        return self.application(env, start_response)
+
+# Фейковый WSGI-application.
+# О чём и извещает пользователя, впоследствии перенаправляя
+# на сайт Роскомнадзора
+class FakeApplication(Framework):
+
+    def __init__(self, routes_obj, fronts_obj):
+        self.application = Framework(routes_obj, fronts_obj)
+        super().__init__(routes_obj, fronts_obj)
+
+    def __call__(self, env, start_response):
+        start_response('200 OK', [('Content-Type', 'text/html')])
+        with open('text.txt', 'r', encoding='utf-8') as infile:
+            content = infile.read()
+        return [bytes(content, encoding='cp1251')]
+

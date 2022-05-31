@@ -11,14 +11,3 @@ def add_key(request):
 
 
 fronts = [add_date, add_key]
-
-routes = {
-    '/': Index(),
-    '/about/': About(),
-    '/contacts/': Contact_us(),
-    '/service_list/': ServicesList(),
-    '/create_service/': CreateService(),
-    '/create_equipment/': CreateEquipment(),
-    '/equipment_list/': EquipmentList(),
-    '/copy_service/': CopyService()
-}

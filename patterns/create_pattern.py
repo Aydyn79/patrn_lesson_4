@@ -61,8 +61,8 @@ class UserFactory:
 
     # Фабричный метод
     @classmethod
-    def create(cls, role):
-        return cls.types[role]()
+    def create(cls, role, name):
+        return cls.types[role](name)
 
 
 # порождающий паттерн Прототип
@@ -130,8 +130,8 @@ class Engine:
         self.equipments = []
 
     @staticmethod
-    def create_user(role):
-        return UserFactory.create(role)
+    def create_user(role, name):
+        return UserFactory.create(role, name)
 
     @staticmethod
     def create_equipment(name, equipment=None):

@@ -1,6 +1,6 @@
 from frame.templator import render
 from logs.config_client_log import LOGGER
-from patterns.create_pattern import Engine
+from patterns.create_pattern import Engine, Debug
 from patterns.create_pattern import Logger
 
 log = Logger()
@@ -8,15 +8,18 @@ log = Logger()
 site = Engine()
 
 class Index:
+    @Debug()
     def __call__(self, request):
         return '200 OK', render('index.html', objects_list=site.equipments, date=request.get('date', None))
 
 
 class About:
+    @Debug()
     def __call__(self, request):
         return '200 OK', render('page.html', date=request.get('date', None))
 
 class Contact_us:
+    @Debug()
     def __call__(self, request):
         return '200 OK', render('contact.html', date=request.get('date', None))
 
@@ -38,7 +41,7 @@ class ServicesList:
 # контроллер создания сервиса
 class CreateService:
     equipment_id = -1
-
+    @Debug()
     def __call__(self, request):
         if request['method'] == 'POST':
             # метод пост
@@ -51,7 +54,7 @@ class CreateService:
             if self.equipment_id != -1:
                 equipment = site.find_equipment_by_id(int(self.equipment_id))
 
-                service = site.create_service('сommissioning', name, equipment)
+                service = site.create_service('remote_support', name, equipment)
                 site.services.append(service)
 
             return '200 OK', render('service_list.html',
@@ -73,6 +76,7 @@ class CreateService:
 
 # контроллер создания категории
 class CreateEquipment:
+    @Debug()
     def __call__(self, request):
 
         if request['method'] == 'POST':
